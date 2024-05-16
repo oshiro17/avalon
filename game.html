@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アヴァロン</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Changed from center to flex-start */
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow-y: auto; /* Added to prevent content from being cut off */
+        }
+
+        h1 {
+            color: #ff66ff;
+            margin-bottom: 20px;
+        }
+        .adventure {
+            background-color: #ffccff;
+            border: 2px solid #ff99ff;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .adventure {
+            display: none;
+        }
+        .adventure.active {
+            display: block;
+        }
+        .finishButton{
+            display: none;
+        }
+        .finishButton.active {
+            display: block;
+        }
+        div {
+            margin: 20px; 
+        }
+
+        .container {
+            background-color: #ffccff;
+            border: 2px solid #ff99ff;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        select, button, input {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            border: 1px solid #ff99ff;
+            font-size: 16px;
+        }
+
+        select, input {
+            background-color: #ffe6ff;
+            color: #660066;
+        }
+
+        button {
+            background-color: #ff66ff;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ff33cc;
+        }
+
+        .center-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .center-buttons button {
+            margin: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .scoreboard {
+            display: none;
+        }
+
+        .scoreboard.active {
+            display: block;
+        }
+
+        .success-row {
+            background-color: lightgreen;
+        }
+
+        .fail-row {
+            background-color: lightcoral;
+        }
+    </style>
+</head>
+<body>
+    <h1>アヴァロン</h1>
+    <div class="container" id="container">
+        <label for="playerCount">人数を選択してください：</label>
+        <select id="playerCount">
+            <option value="5">5人</option>
+            <option value="6">6人</option>
+            <option value="7">7人</option>
+            <option value="8">8人</option>
+            <option value="9">9人</option>
+        </select>
+        <br>
+        <button onclick="prepareNames()">スタート</button>
+    </div>
+    <div class="adventure" id="adventure"></div>
+    <div class="finishButton" id="finishButton"><button onclick="endGame()">アヴァロン終了</button></div>
+    <audio id="audio" src="file.m4a"></audio>
+    <script>
+        let playerCount;
+        let currentPlayerIndex = 1;
+        let roles = [];
+        let playerNames = [];
+        let successCount = 0;
+        let failCount = 0;
+
+        function prepareNames() {
+            playerCount = parseInt(document.getElementById("playerCount").value);
+            roles = generateRoles(playerCount);
+
+            let container = document.getElementById("container");
+            let content = `<label>${playerCount}人でゲームを開始します！</label><br>`;
+
+            for (let i = 1; i <= playerCount; i++) {
+                content += `<label>${i}人目の名前を入力：</label>`;
+                content += `<input type="text" id="player${i}Name" placeholder="名前を入力"><br>`;
+            }
+
+            content += `<button onclick="startGame()">ゲームを開始</button>`;
+            container.innerHTML = content;
+        }
+
+        function generateRoles(count) {
+            let roles = [];
+            switch (count) {
+                case 5:
+                    roles = ['マーリン', 'パーシバル', 'アーサー王の忠臣', 'アサシン', 'モルガナ'];
+                    break;
+                case 6:
+                    roles = ['マーリン', 'パーシバル', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アサシン', 'モルガナ'];
+                    break;
+                case 7:
+                    roles = ['マーリン', 'パーシバル', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アサシン', 'モルガナ', 'モルドレッド'];
+                    break;
+                case 8:
+                    roles = ['マーリン', 'パーシバル', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アサシン', 'モルガナ', 'モルドレッド'];
+                    break;
+                case 9:
+                    roles = ['マーリン', 'パーシバル', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アサシン', 'モルガナ', 'モルドレッド', 'マイリン'];
+                    break;
+            }
+            for (let i = roles.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [roles[i], roles[j]] = [roles[j], roles[i]];
+            }
+            return roles;
+        }
+
+        function startGame() {
+            if (currentPlayerIndex > playerCount) {
+                showFinalButtons();
+                return;
+            }
+
+            if (currentPlayerIndex === 1) {
+                for (let i = 1; i <= playerCount; i++) {
+                    playerNames.push(document.getElementById(`player${i}Name`).value);
+                }
+            }
+
+            let playerName = playerNames[currentPlayerIndex - 1];
+
+            let container = document.getElementById("container");
+            let content = `<label>${playerName}さん</label><br>`;
+            content += `<button onclick="showRole('${playerName}')">役職を見る</button>`;
+            container.innerHTML = content;
+        }
+
+        function showRole(playerName) {
+            let role = roles[currentPlayerIndex - 1];
+            let evilPlayers = playerNames.filter((_, i) => ['アサシン', 'モルガナ', 'モルドレッド'].includes(roles[i]));
+            let merlinPlayers = playerNames.filter((_, i) => ['マーリン', 'モルガナ'].includes(roles[i]));
+
+            let container = document.getElementById("container");
+            let content = `<label>${playerName}さんの役職は${role}です</label><br>`;
+            if (role === 'マーリン') {
+                content += `全ての悪役を知っているが、自分の正体を隠す必要がある(正義)<br>`;
+                content += `悪役は ${evilPlayers.join(', ')} です<br>`;
+            } else if (role === 'パーシバル') {
+                content += `マーリンを知っている(正義)<br>`;
+                content += `マーリンは ${merlinPlayers.join(' または ')} です<br>`;
+            } else if (role === 'アーサー王の忠臣') {
+                content += `普通の市民(正義)<br>`;
+            } else if (role === 'アサシン') {
+                content += `暗殺決定権（邪悪）<br>`;
+                content += `他の邪悪メンバーは ${evilPlayers.join(', ')} です<br>`;
+            } else if (role === 'モルガナ') {
+                content += `パーシバルにマーリンとして見える（邪悪）<br>`;
+                content += `他の邪悪メンバーは ${evilPlayers.join(', ')} です<br>`;
+            } else if (role === 'モルドレッド') {
+                content += `マーリンに見られない（邪悪）<br>`;
+                content += `他の邪悪メンバーは ${evilPlayers.join(', ')} です<br>`;
+            }
+
+            currentPlayerIndex++;
+            if (currentPlayerIndex <= playerCount) {
+                content += `<button onclick="startGame()">次へ</button>`;
+            } else {
+                content += `<button onclick="start_game()">次へ</button>`;
+            }
+            container.innerHTML = content;
+        }
+
+        function start_game() {
+            let container = document.getElementById("container");
+            let audio = document.getElementById("audio");
+            let content = `
+                <div class="center-buttons">
+                    <button onclick="go()">さあ行こう</button>
+                    <button onclick="audio.play()">音声で確認する</button>
+                    <button onclick="audio.pause()">音声停止</button>
+                </div>
+            `;
+            container.innerHTML = content;
+        }
+
+        function go() {
+            let container = document.getElementById("container");
+            let content = `
+                <div class="button-group">
+                    <button onclick="showScoreboard(5)">5人プレイヤー</button>
+                    <button onclick="showScoreboard(6)">6人プレイヤー</button>
+                    <button onclick="showScoreboard(7)">7人プレイヤー</button>
+                    <button onclick="showScoreboard(8)">8人プレイヤー</button>
+                    <button onclick="showScoreboard(9)">9人プレイヤー</button>
+                    <button onclick="showScoreboard(10)">10人プレイヤー</button>
+                </div>
+                <div id="scoreboard-5" class="scoreboard">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ラウンド</th>
+                                <th>勝利条件</th>
+                                <th>選択</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>2/2</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>2</td><td>3/3</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>3</td><td>2/2</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>4</td><td>3/3</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>5</td><td>3/3</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="scoreboard-6" class="scoreboard">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ラウンド</th>
+                                <th>勝利条件</th>
+                                <th>選択</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>2/2</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>2</td><td>3/3</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>3</td><td>4/4</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>4</td><td>3/3</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>5</td><td>4/4</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="scoreboard-7" class="scoreboard">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ラウンド</th>
+                                <th>勝利条件</th>
+                                <th>選択</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>2/2</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>2</td><td>3/3</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>3</td><td>3/3</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>4</td><td>3/4</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>5</td><td>4/4</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="scoreboard-8" class="scoreboard">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ラウンド</th>
+                                <th>勝利条件</th>
+                                <th>選択</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>3/3</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>2</td><td>4/4</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>3</td><td>4/4</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>4</td><td>4/5</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>5</td><td>5/5</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="scoreboard-9" class="scoreboard">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ラウンド</th>
+                                <th>勝利条件</th>
+                                <th>選択</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>3/3</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>2</td><td>4/4</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>3</td><td>4/4</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>4</td><td>4/5</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>5</td><td>5/5</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="scoreboard-10" class="scoreboard">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ラウンド</th>
+                                <th>勝利条件</th>
+                                <th>選択</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>3/3</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>2</td><td>4/4</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>3</td><td>4/4</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>4</td><td>4/5</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                            <tr><td>5</td><td>5/5</td><td><select onchange="changeColor(this)"><option value="">選択する</option><option value="success">成功</option><option value="fail">失敗</option></select></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            container.innerHTML = content;
+            goOnAdventure();
+        }
+
+        function goOnAdventure() {
+            const adventure = document.getElementById("adventure");
+            adventure.innerHTML = `
+                <label>成功か失敗を選択してください：</label><br>
+                <select id="outcome">
+                    <option value="success">選択する</option>
+                    <option value="success">成功</option>
+                    <option value="fail">失敗</option>
+                </select><br>
+                <button onclick="recordOutcome()">次へ</button>
+                <button onclick="endVote()">冒険終了</button>
+            `;
+            adventure.classList.add('active');
+            const finishButton = document.getElementById("finishButton");
+            finishButton.classList.add('active');
+        }
+
+        function recordOutcome() {
+            const outcome = document.getElementById("outcome").value;
+            if (outcome === "success") {
+                successCount++;
+            } else if (outcome === "fail") {
+                failCount++;
+            }
+            goOnAdventure(); // 次の選択を表示
+        }
+
+        function endVote() {
+            const adventure = document.getElementById("adventure");
+            adventure.innerHTML = `
+                <h2>冒険結果</h2>
+                <p>成功の回数: ${successCount}</p>
+                <p>失敗の回数: ${failCount}</p>
+                <button onclick="goOnAdventure()">冒険に行く</button>
+            `;
+            successCount = 0;
+            failCount = 0;
+        }
+
+        function showScoreboard(players) {
+            const scoreboards = document.querySelectorAll('.scoreboard');
+            scoreboards.forEach(board => board.classList.remove('active'));
+            document.getElementById(`scoreboard-${players}`).classList.add('active');
+        }
+
+        function changeColor(select) {
+            const row = select.closest('tr');
+            row.classList.remove('success-row', 'fail-row');
+            if (select.value === 'success') {
+                row.classList.add('success-row');
+            } else if (select.value === 'fail') {
+                row.classList.add('fail-row');
+            }
+        }
+
+        function endGame() {
+    const adventure = document.getElementById("adventure");
+    const button = document.getElementById("finishButton");
+
+    adventure.style.display = 'none';
+    button.style.display = 'none';
+            let container = document.getElementById("container");
+            let content = `
+                <h2>ゲーム終了</h2>
+                <h3>メンバーと役割</h3>
+                <ul>
+            `;
+            for (let i = 0; i < playerNames.length; i++) {
+                content += `<li>${playerNames[i]}: ${roles[i]}</li>`;
+            }
+            content += `</ul>`;
+            container.innerHTML = content;
+        }
+    </script>
+</body>
+</html>
