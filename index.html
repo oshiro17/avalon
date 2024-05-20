@@ -140,6 +140,7 @@
     <div class="adventure" id="adventure"></div>
     <div class="finishButton" id="finishButton"><button onclick="endGame()">アヴァロン終了</button></div>
     <audio id="audio" src="file.m4a"></audio>
+    <audio id="aaudio" src="ゆったりお散歩.mp3"></audio>
     <script>
         let playerCount;
         let currentPlayerIndex = 1;
@@ -389,7 +390,6 @@
    
         
         function startAdventure() {
-            const adventure = document.getElementById("adventure");
             adventure.innerHTML = `
                 <label>人数選択してください：</label><br>
                 <select id="selectmen">
@@ -406,6 +406,10 @@
         }
         let gomen;
         function goAdventure() {
+
+          let audio = document.getElementById("aaudio");
+          audio.play();
+
             gomen = document.getElementById("selectmen").value;
             const adventure = document.getElementById("adventure");
             adventure.innerHTML = `
@@ -438,6 +442,8 @@
         }
 
         function endVote() {
+          let audio = document.getElementById("aaudio");
+          audio.pause();
             const adventure = document.getElementById("adventure");
             adventure.innerHTML = `
                 <h2>冒険結果</h2>
