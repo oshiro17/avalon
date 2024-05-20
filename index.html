@@ -109,6 +109,18 @@
         .fail-row {
             background-color: lightcoral;
         }
+        .circle-button {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: lightblue;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
@@ -249,14 +261,6 @@
         function go() {
             let container = document.getElementById("container");
             let content = `
-                <div class="button-group">
-                    <button onclick="showScoreboard(5)">5人プレイヤー</button>
-                    <button onclick="showScoreboard(6)">6人プレイヤー</button>
-                    <button onclick="showScoreboard(7)">7人プレイヤー</button>
-                    <button onclick="showScoreboard(8)">8人プレイヤー</button>
-                    <button onclick="showScoreboard(9)">9人プレイヤー</button>
-                    <button onclick="showScoreboard(10)">10人プレイヤー</button>
-                </div>
                 <div id="scoreboard-5" class="scoreboard">
                     <table>
                         <thead>
@@ -365,22 +369,54 @@
                         </tbody>
                     </table>
                 </div>
-            `;
-            container.innerHTML = content;
-            goOnAdventure();
-        }
+                <div class="circle-button" id="counterButton" onclick="decrementCounter(this)">5</div>
 
-        function goOnAdventure() {
+            `;
+            
+            container.innerHTML = content;
+
+            showScoreboard(playerCount);
+            startAdventure();
+        }
+        function decrementCounter(button) {
+            let currentCount = parseInt(button.textContent);
+            if (currentCount > 0) {
+                button.textContent = currentCount - 1;
+            } else {
+                button.textContent = 5;
+            }
+        }
+   
+        
+        function startAdventure() {
+            const adventure = document.getElementById("adventure");
+            adventure.innerHTML = `
+                <label>人数選択してください：</label><br>
+                <select id="selectmen">
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select><br>
+                <button onclick="goAdventure()">冒険go</button>
+            `;
+            adventure.classList.add('active');
+            const finishButton = document.getElementById("finishButton");
+            finishButton.classList.add('active');
+        }
+        let gomen;
+        function goAdventure() {
+            gomen = document.getElementById("selectmen").value;
             const adventure = document.getElementById("adventure");
             adventure.innerHTML = `
                 <label>成功か失敗を選択してください：</label><br>
+                <label> ${gomen}人で冒険中です</label><br>
                 <select id="outcome">
                     <option value="success">選択する</option>
                     <option value="success">成功</option>
                     <option value="fail">失敗</option>
                 </select><br>
                 <button onclick="recordOutcome()">次へ</button>
-                <button onclick="endVote()">冒険終了</button>
             `;
             adventure.classList.add('active');
             const finishButton = document.getElementById("finishButton");
@@ -394,7 +430,11 @@
             } else if (outcome === "fail") {
                 failCount++;
             }
-            goOnAdventure(); // 次の選択を表示
+            if (successCount+failCount==gomen)
+            {
+              endVote();
+            }
+            document.getElementById("outcome").value = "success";
         }
 
         function endVote() {
@@ -403,7 +443,7 @@
                 <h2>冒険結果</h2>
                 <p>成功の回数: ${successCount}</p>
                 <p>失敗の回数: ${failCount}</p>
-                <button onclick="goOnAdventure()">冒険に行く</button>
+                <button onclick="startAdventure()">冒険に行く</button>
             `;
             successCount = 0;
             failCount = 0;
