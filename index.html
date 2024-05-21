@@ -214,13 +214,14 @@
         function showRole(playerName) {
             let role = roles[currentPlayerIndex - 1];
             let evilPlayers = playerNames.filter((_, i) => ['アサシン', 'モルガナ', 'モルドレッド'].includes(roles[i]));
+            let evilPlayersForM = playerNames.filter((_, i) => ['アサシン', 'モルガナ'].includes(roles[i]));
             let merlinPlayers = playerNames.filter((_, i) => ['マーリン', 'モルガナ'].includes(roles[i]));
 
             let container = document.getElementById("container");
             let content = `<label>${playerName}さんの役職は${role}です</label><br>`;
             if (role === 'マーリン') {
                 content += `全ての悪役を知っているが、自分の正体を隠す必要がある(正義)<br>`;
-                content += `悪役は ${evilPlayers.join(', ')} です<br>`;
+                content += `悪役は ${evilPlayersForM.join(', ')} です<br>`;
             } else if (role === 'パーシバル') {
                 content += `マーリンを知っている(正義)<br>`;
                 content += `マーリンは ${merlinPlayers.join(' または ')} です<br>`;
