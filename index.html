@@ -128,17 +128,30 @@
 <body>
     <h1>アヴァロン</h1>
     <div class="container" id="container">
-        <label for="playerCount">人数を選択してください：</label>
-        <select id="playerCount">
-            <option value="5">5人</option>
-            <option value="6">6人</option>
-            <option value="7">7人</option>
-            <option value="8">8人</option>
-            <option value="9">9人</option>
-            <option value="10">10人</option>
-        </select>
-        <br>
-        <button onclick="prepareNames()">スタート</button>
+        <label for="playerCount">人数を選択してください</label>
+        <ul class="playerCountButtons">
+            <li><button onclick="prepareNames(5)">5人でプレイ</button></li>
+            <li><button onclick="prepareNames(6)">6人でプレイ</button></li>
+            <li><button onclick="prepareNames(7)">7人でプレイ</button></li>
+            <li><button onclick="prepareNames(8)">8人でプレイ</button></li>
+            <li><button onclick="prepareNames(9)">9人でプレイ</button></li>
+            <li><button onclick="prepareNames(10)">10人でプレイ</button></li>
+        </ul>
+        <style>
+            .playerCountButtons {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(5, 1fr);
+                gap: 10px;
+                list-style: none;
+                padding: 0;
+            }
+            .playerCountButtons li {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        </style>
     </div>
     <div class="adventure" id="adventure"></div>
     <div class="finishButton" id="finishButton"><button onclick="endGame()">アヴァロン終了</button></div>
@@ -152,8 +165,7 @@
         let successCount = 0;
         let failCount = 0;
 
-        function prepareNames() {
-            playerCount = parseInt(document.getElementById("playerCount").value);
+        function prepareNames(playerCount) {
             roles = generateRoles(playerCount);
 
             let container = document.getElementById("container");
@@ -161,7 +173,7 @@
 
             for (let i = 1; i <= playerCount; i++) {
                 content += `<label>${i}人目の名前を入力：</label>`;
-                content += `<input type="text" id="player${i}Name" placeholder="名前を入力"><br>`;
+                content += `<input type="text" id="player${i}Name" placeholder="名前を入力" value="プレイヤー${i}" onfocus="this.value=''"><br>`;
             }
 
             content += `<button onclick="startGame()">ゲームを開始</button>`;
@@ -178,16 +190,16 @@
                     roles = ['マーリン', 'パーシバル', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アサシン', 'モルガナ'];
                     break;
                 case 7:
-                    roles = ['マーリン', 'パーシバル', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アサシン', 'モルガナ', 'モルドレッド'];
+                    roles = ['マーリン', 'パーシバル', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アサシン', 'モルガナ', 'モードレッド'];
                     break;
                 case 8:
-                    roles = ['マーリン', 'パーシバル', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アサシン', 'モルガナ', 'モルドレッド'];
+                    roles = ['マーリン', 'パーシバル', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アサシン', 'モルガナ', 'モードレッド'];
                     break;
                 case 9:
-                    roles = ['マーリン', 'パーシバル', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アサシン', 'モルガナ', 'モルドレッド', 'アサシン'];
+                    roles = ['マーリン', 'パーシバル', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アーサー王の忠臣', 'アサシン', 'モルガナ', 'モードレッド', 'アサシン'];
                     break;
                 case 10:
-                    roles = ['マーリン', 'パーシバル', 'アーサー王の忠臣', 'アーサー王の忠臣','アーサー王の忠臣', 'アーサー王の忠臣', 'アサシン', 'モルガナ', 'モルドレッド', 'アサシン'];
+                    roles = ['マーリン', 'パーシバル', 'アーサー王の忠臣', 'アーサー王の忠臣','アーサー王の忠臣', 'アーサー王の忠臣', 'アサシン', 'モルガナ', 'モードレッド', 'アサシン'];
                     break;
             }
             for (let i = roles.length - 1; i > 0; i--) {
@@ -219,7 +231,7 @@
 
         function showRole(playerName) {
             let role = roles[currentPlayerIndex - 1];
-            let evilPlayers = playerNames.filter((_, i) => ['アサシン', 'モルガナ', 'モルドレッド'].includes(roles[i]));
+            let evilPlayers = playerNames.filter((_, i) => ['アサシン', 'モルガナ', 'モードレッド'].includes(roles[i]));
             let evilPlayersForM = playerNames.filter((_, i) => ['アサシン', 'モルガナ'].includes(roles[i]));
             let merlinPlayers = playerNames.filter((_, i) => ['マーリン', 'モルガナ'].includes(roles[i]));
 
@@ -239,7 +251,7 @@
             } else if (role === 'モルガナ') {
                 content += `パーシバルにマーリンとして見える（邪悪）<br>`;
                 content += `他の邪悪メンバーは ${evilPlayers.join(', ')} です<br>`;
-            } else if (role === 'モルドレッド') {
+            } else if (role === 'モードレッド') {
                 content += `マーリンに見られない（邪悪）<br>`;
                 content += `他の邪悪メンバーは ${evilPlayers.join(', ')} です<br>`;
             }
