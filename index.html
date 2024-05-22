@@ -128,17 +128,30 @@
 <body>
     <h1>アヴァロン</h1>
     <div class="container" id="container">
-        <label for="playerCount">人数を選択してください：</label>
-        <select id="playerCount">
-            <option value="5">5人</option>
-            <option value="6">6人</option>
-            <option value="7">7人</option>
-            <option value="8">8人</option>
-            <option value="9">9人</option>
-            <option value="10">10人</option>
-        </select>
-        <br>
-        <button onclick="prepareNames()">スタート</button>
+        <label for="playerCount">人数を選択してください</label>
+        <ul class="playerCountButtons">
+            <li><button onclick="prepareNames(5)">5人でプレイ</button></li>
+            <li><button onclick="prepareNames(6)">6人でプレイ</button></li>
+            <li><button onclick="prepareNames(7)">7人でプレイ</button></li>
+            <li><button onclick="prepareNames(8)">8人でプレイ</button></li>
+            <li><button onclick="prepareNames(9)">9人でプレイ</button></li>
+            <li><button onclick="prepareNames(10)">10人でプレイ</button></li>
+        </ul>
+        <style>
+            .playerCountButtons {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(5, 1fr);
+                gap: 10px;
+                list-style: none;
+                padding: 0;
+            }
+            .playerCountButtons li {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        </style>
     </div>
     <div class="adventure" id="adventure"></div>
     <div class="finishButton" id="finishButton"><button onclick="endGame()">アヴァロン終了</button></div>
@@ -152,8 +165,7 @@
         let successCount = 0;
         let failCount = 0;
 
-        function prepareNames() {
-            playerCount = parseInt(document.getElementById("playerCount").value);
+        function prepareNames(playerCount) {
             roles = generateRoles(playerCount);
 
             let container = document.getElementById("container");
