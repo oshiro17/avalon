@@ -173,7 +173,7 @@
 
             for (let i = 1; i <= playerCount; i++) {
                 content += `<label>${i}人目の名前を入力：</label>`;
-                content += `<input type="text" id="player${i}Name" placeholder="名前を入力"><br>`;
+                content += `<input type="text" id="player${i}Name" placeholder="名前を入力" value="プレイヤー${i}" onfocus="this.value=''"><br>`;
             }
 
             content += `<button onclick="startGame()">ゲームを開始</button>`;
