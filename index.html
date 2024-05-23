@@ -165,8 +165,9 @@
         let successCount = 0;
         let failCount = 0;
 
-        function prepareNames(playerCount) {
-            roles = generateRoles(playerCount);
+        function prepareNames(count) {
+            roles = generateRoles(count);
+            playerCount = count;
 
             let container = document.getElementById("container");
             let content = `<label>${playerCount}人でゲームを開始します！</label><br>`;
